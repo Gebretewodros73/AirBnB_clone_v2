@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" makes and share  an archive to web servers,
+""" makes and share the  archive to web servers,
 using created function deploy and pack"""
 from fabric.api import *
 import os
