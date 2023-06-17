@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" Fabfile that creates a .tgz archive from
+""" Fabfile that creates  .tgz archive from
 the contents of web_static folder"""
 
 from fabric.api import local
@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 def do_pack():
-    """Pack all the contents in the web_static directory
+    """wraps all the contents in the web_static directory
     as a tar archive"""
 
     try:
