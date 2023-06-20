@@ -48,7 +48,7 @@ class test_basemodel(unittest.TestCase):
             new = BaseModel(**copy)
 
     def test_save(self):
-        """ Testing save """
+        """ Test save """
         i = self.value()
         i.save()
         key = self.name + "." + i.id
