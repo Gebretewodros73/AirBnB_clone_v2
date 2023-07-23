@@ -1,28 +1,26 @@
 #!/usr/bin/env bash
-#  script that set up  web servers for the deployment of web_static
 
-sudo apt-get -y update > /dev/null
-sudo apt-get install -y nginx > /dev/null
+# Update package list and install Nginx
+sudo apt-get update
+sudo apt-get install -y nginx
 
-# creating all  necessary directories and file
-mkdir -p /data/web_static/releases/test/
-mkdir -p /data/web_static/shared/
-touch /data/web_static/releases/test/index.html
-echo "Hello World again!" > /data/web_static/releases/test/index.html
+# Create necessary directories and files with proper permissions
+sudo mkdir -p /data/web_static/releases/test/
+sudo mkdir -p /data/web_static/shared/
+sudo touch /data/web_static/releases/test/index.html
+sudo bash -c 'echo "Hello World again!" > /data/web_static/releases/test/index.html'
 
-#  check if the current directory exits and remove it
-if [ -d "/data/web_static/current" ]
-then
-        sudo rm -rf /data/web_static/current
-fi
-# Create a symbolic link to the test
-ln -sf /data/web_static/releases/test/ /data/web_static/current
+# Remove existing "current" directory if it exists
+sudo rm -rf /data/web_static/current
 
-# change ownership to  ubuntu
-chown -hR ubuntu:ubuntu /data
+# Create symbolic link to the test directory
+sudo ln -s /data/web_static/releases/test /data/web_static/current
 
-# Configure nginx to serve content pointed to by symbolic link to hbnb_static
-sed -i '38i\\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t}\n' /etc/nginx/sites-available/default
+# Change ownership of the directories to the current user
+sudo chown -R $USER:$USER /data/
 
-# Restart server
-service nginx restart
+# Configure Nginx to serve the web_static content
+sudo sed -i '/^\tlocation \/ {/a \\\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t}\n' /etc/nginx/sites-available/default
+
+# Restart Nginx
+sudo service nginx restart
