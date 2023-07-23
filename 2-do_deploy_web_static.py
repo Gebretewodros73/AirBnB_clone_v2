@@ -1,49 +1,49 @@
 #!/usr/bin/python3
-""""Fabric script that distributes an archive to web servers"""
-
+# Fabfile to distribute an archive to a web server.
 import os.path
-from fabric.api import *
-from fabric.operations import run, put, sudo
+from fabric.api import env
+from fabric.api import put
+from fabric.api import run
 
-env.hosts = ['54.157.144.57', '3.85.148.165']
-env.user = 'ubuntu'
-env.key_filename = '~/.ssh/alx_server'
+env.hosts = ["104.196.168.90", "35.196.46.172"]
 
 
 def do_deploy(archive_path):
-    """ distribute archive to a web server"""
-    if (os.path.isfile(archive_path) is False):
+    """Distributes an archive to a web server.
+
+    Args:
+        archive_path (str): The path of the archive to distribute.
+    Returns:
+        If the file doesn't exist at archive_path or an error occurs - False.
+        Otherwise - True.
+    """
+    if os.path.isfile(archive_path) is False:
         return False
+    file = archive_path.split("/")[-1]
+    name = file.split(".")[0]
 
-    try:
-        new_comp = archive_path.split("/")[-1]
-        new_folder = ("/data/web_static/releases/" + new_comp.split(".")[0])
-
-        # push archive to the /tmp/ directory of the web server
-        put(archive_path, "/tmp/")
-
-        # Uncompress the archive to the folder /data/web_static/releases/<archive filename
-        # without extension> on the web server
-        run("sudo mkdir -p {}".format(new_folder))
-        run("sudo tar -xzf /tmp/{} -C {}".
-            format(new_comp, new_folder))
-
-        # delete the archive created from the web server
-        run("sudo rm /tmp/{}".format(new_comp))
-
-	# move contents into host web_static
-        run("sudo mv {}/web_static/* {}/".format(new_folder, new_folder))
-
-        # remove extra  web_static dir
-        run("sudo rm -rf {}/web_static".format(new_folder))
-
-        # Delete the symbolic link /data/web_static/current from the web server
-        run('sudo rm -rf /data/web_static/current')
-
-        # Create a new the symbolic link /data/web_static/current on the web server,
-        # linked to the new version of your code (/data/web_static/releases/<archive filename without extension>)
-        run("sudo ln -s {} /data/web_static/current".format(new_folder))
-
-        return True
-    except:
+    if put(archive_path, "/tmp/{}".format(file)).failed is True:
         return False
+    if run("rm -rf /data/web_static/releases/{}/".
+           format(name)).failed is True:
+        return False
+    if run("mkdir -p /data/web_static/releases/{}/".
+           format(name)).failed is True:
+        return False
+    if run("tar -xzf /tmp/{} -C /data/web_static/releases/{}/".
+           format(file, name)).failed is True:
+        return False
+    if run("rm /tmp/{}".format(file)).failed is True:
+        return False
+    if run("mv /data/web_static/releases/{}/web_static/* "
+           "/data/web_static/releases/{}/".format(name, name)).failed is True:
+        return False
+    if run("rm -rf /data/web_static/releases/{}/web_static".
+           format(name)).failed is True:
+        return False
+    if run("rm -rf /data/web_static/current").failed is True:
+        return False
+    if run("ln -s /data/web_static/releases/{}/ /data/web_static/current".
+           format(name)).failed is True:
+        return False
+    return True
